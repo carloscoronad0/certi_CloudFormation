@@ -4,6 +4,35 @@ Transform:
 
 Description: Lambda CloudFormation Lab
 Resources:
+#  MyLambdaRole:
+#   Type: AWS::IAM::Role
+#    Properties:
+#      RoleName: my-upb-cf-role
+#      AssumeRolePolicyDocument:
+#        Version: '2012-10-17'
+#        Statement:
+#        - Effect: Allow
+#          Principal:
+#            Service:
+#            - lambda.amazonaws.com
+#          Action:
+#          - sts:AssumeRole
+#      Path: "/"
+#      Policies:
+#      - PolicyName: my-dynmoapi-policy
+#        PolicyDocument:
+#          Version: '2012-10-17'
+#          Statement:
+#          - Effect: Allow
+#            Action:
+#            - logs:CreateLogGroup
+#            - logs:CreateLogStream
+#            - logs:PutLogEvents
+#            Resource: arn:aws:logs:*:*:*
+#          - Effect: Allow
+#            Action:
+#            - dynamodb:GetItem
+#            Resource: arn:aws:dynamodb:*:*:table/users-table
   GetUser:
     Type: AWS::Serverless::Function
     Properties:
@@ -11,6 +40,10 @@ Resources:
       Handler: user.getUser # nombre del archivo para la funcion lambda y nombre de la funcion
       Runtime: python3.6
       CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+#      Role: !GetAtt MyLambdaRole.Arn
       Environment:
         Variables:
           USERS_TABLE: !Ref UsersTable # Para agregar USERS_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
@@ -20,7 +53,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref MyAPI
-            Path: /user # tiene que ser el mismo que en swagger.yaml
+            Path: "/user/{userId}" # tiene que ser el mismo que en swagger.yaml
             Method: GET    
 
   PutUser:
@@ -30,6 +63,10 @@ Resources:
       Handler: user.putUser # nombre del archivo para la funcion lambda y nombre de la funcion
       Runtime: python3.6
       CodeUri: package/
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTable
+#      Role: !GetAtt MyLambdaRole.Arn      
       Environment:
         Variables:
           USERS_TABLE: !Ref UsersTable # Para agregar USERS_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
@@ -38,8 +75,8 @@ Resources:
         GetUsers:
           Type: Api
           Properties:
-            RestApiId: !Ref MyAPI # haciendo referenca a la API de mas abajo
-            Path: /user # tiene que ser el mismo que en swagger.yaml
+            RestApiId: !Ref MyAPI # haciendo referenca a la API de mas asbajo
+            Path: "/user/{userId}" # tiene que ser el mismo que en wagger.yaml
             Method: PUT 
   
   MyAPI:

@@ -9,7 +9,11 @@ Resources:
       FunctionName: getUser
       Handler: user.getUser
       Runtime: python3.6
-      CodeUri: s3://lambda-cloudformation-lab/e1295295600628c08a1042721d53f6c5
+      CodeUri: s3://lambda-cloudformation-lab/dc0131fb14692189b7d981ad3b6eb47f
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: UsersTable
       Environment:
         Variables:
           USERS_TABLE:
@@ -20,7 +24,7 @@ Resources:
           Properties:
             RestApiId:
               Ref: MyAPI
-            Path: /user
+            Path: /user/{userId}
             Method: GET
   PutUser:
     Type: AWS::Serverless::Function
@@ -28,7 +32,11 @@ Resources:
       FunctionName: putUser
       Handler: user.putUser
       Runtime: python3.6
-      CodeUri: s3://lambda-cloudformation-lab/e1295295600628c08a1042721d53f6c5
+      CodeUri: s3://lambda-cloudformation-lab/dc0131fb14692189b7d981ad3b6eb47f
+      Policies:
+      - DynamoDBWritePolicy:
+          TableName:
+            Ref: UsersTable
       Environment:
         Variables:
           USERS_TABLE:
@@ -39,7 +47,7 @@ Resources:
           Properties:
             RestApiId:
               Ref: MyAPI
-            Path: /user
+            Path: /user/{userId}
             Method: PUT
   MyAPI:
     Type: AWS::Serverless::Api
@@ -50,7 +58,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://lambda-cloudformation-lab/97a641bce913a107b5c82212a8bc100d
+            Location: s3://lambda-cloudformation-lab/93783a69a37ca8f2af173a8f9d754acf
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
