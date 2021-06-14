@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+- AWS::Serverless-2016-10-31
+Description: In Class Practice
+Resources:
+  GetMovie:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getMovie
+      Handler: theater.getMovie
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        GetUsers:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /movies/{movie_id}
+            Method: GET
+  RoomsPerDay:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: roomsPerDay
+      Handler: theater.roomsPerDay
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        GetUsers:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /roomsPerDay/movies/{movie_id}
+            Method: GET
+  PutMovie:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: putMovie
+      Handler: theater.putMovie
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      Policies:
+      - DynamoDBWritePolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        GetUsers:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /movies/{movie_id}
+            Method: PUT
+  MyMovieTheaterAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: movie-theater-api
+      StageName: prod
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: s3://lambda-cloudformation-lab/69bc69a9e854df533a11b6de9aa8dadb
+  MyMovieTheaterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: movie-theater-table
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      KeySchema:
+      - AttributeName: pk
+        KeyType: HASH
+      - AttributeName: sk
+        KeyType: RANGE
+      AttributeDefinitions:
+      - AttributeName: pk
+        AttributeType: S
+      - AttributeName: sk
+        AttributeType: S

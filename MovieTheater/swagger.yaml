@@ -1,0 +1,135 @@
+openapi: 3.0.0
+
+paths:
+  /movies/{movie_id}:
+    get:
+      summary: This endpoint returns the movie info given a movie id
+      parameters:
+        - name: movie_id
+          in: path
+          required: true
+          description: movie unique Id
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:getMovie/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+    put:
+      summary: This endpoint saves a movie info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actors:
+                  type: array
+                  items:
+                    type: string
+                year:
+                  type: string
+                title:
+                  type: string
+      parameters:
+        - name: movie_id
+          in: path
+          required: true
+          description: movie unique Id
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:putMovie/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+
+  /roomsPerDay/movies/{movie_id}:
+    get:
+      summary: This endpoint returns the info of available Cinema Rooms for a movie
+      parameters:
+        - name: movie_id
+          in: path
+          required: true
+          description: movie unique Id
+        - name: date
+          in: query
+          schema:
+            type: string
+          description: date of movie
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:roomsPerDay/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+        
+  /rooms/{room_id}:
+    get:
+      summary: This endpoint returns he movie info given a movie id
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          description: room unique Id
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:getRoom/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+        
+  /persons/{person_id}
+    get:
+      summary: This endpoint returns all the movies a person has watched including date
+      parameters:
+        - name: person_id
+          in: path
+          required: true
+          description: person unique Id
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:getPersonMoviesWatched/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+        
+  /movies/{movie_id}/rooms/{room_id}:
+    get:
+      summary: This endpoint returns all the people that will attend to the movie
+      parameters:
+        - name: movie_id
+          in: path
+          required: true
+          description: person unique Id
+        - name: room_id
+          in: path
+          required: true
+          description: room unique Id
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:getPeopleAssist/invocations"
+        httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
+        
+  /register/persons:
+    put:
+      summary: This endpoint add persons to a movie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                persons:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      person_id:
+                        type: string
+                room_id:
+                  type: string
+                date:
+                  type: string
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:putPersonsToMovie/invocations"
+        httpMethod: "POST"

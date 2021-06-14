@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Description: In Class Practice
+Resources:
+# -------------------------------------------------------------------------------------------------------------------
+  GetMovie:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getMovie
+      Handler: theater.getMovie # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar MOVIES_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        GetMovieInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI
+            Path: "/movies/{movie_id}" # tiene que ser el mismo que en swagger.yaml
+            Method: GET   
+            
+  RoomsPerDay:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: roomsPerDay
+      Handler: theater.roomsPerDay # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar MOVIES_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        GetRoomPerDayInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI
+            Path: "/roomsPerDay/movies/{movie_id}" # tiene que ser el mismo que en swagger.yaml
+            Method: GET
+            
+  GetRoom:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getRoom
+      Handler: theater.getRoom # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar MOVIES_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        GetRoomInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI
+            Path: "/rooms/{room_id}" # tiene que ser el mismo que en swagger.yaml
+            Method: GET
+            
+  GetPersonMoviesWatched:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getPersonMoviesWatched
+      Handler: theater.getPersonMoviesWatched # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar MOVIES_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        getPersonMoviesWatchedInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI
+            Path: "/persons/{person_id}" # tiene que ser el mismo que en swagger.yaml
+            Method: GET
+            
+  GetPeopleAssist:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getPeopleAssist
+      Handler: theater.getPeopleAssist # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar MOVIES_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        getPeopleAssistInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI
+            Path: "/movies/{movie_id}/rooms/{room_id}" # tiene que ser el mismo que en swagger.yaml
+            Method: GET
+# -------------------------------------------------------------------------------------------------------------------
+            
+  PutMovie:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: putMovie
+      Handler: theater.putMovie # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar USERS_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        PutMovieInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI # haciendo referenca a la API de mas asbajo
+            Path: "/movies/{movie_id}" # tiene que ser el mismo que en wagger.yaml
+            Method: PUT
+
+  PutPersons:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: putPersons
+      Handler: theater.putPersonsToMovie # nombre del archivo para la funcion lambda y nombre de la funcion
+      Runtime: python3.6
+      CodeUri: package/
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE: !Ref MyMovieTheaterTable # Para agregar USERS_TABLE como variable de entorno que hace referencia (!Ref) a UsersTable mas abajo
+          
+      Events:
+        PutMovieInfo:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyMovieTheaterAPI # haciendo referenca a la API de mas asbajo
+            Path: "/register/persons" # tiene que ser el mismo que en wagger.yaml
+            Method: PUT
+# -------------------------------------------------------------------------------------------------------------------
+  
+  MyMovieTheaterAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: movie-theater-api
+      StageName: prod
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: swagger.yaml
+            
+# -------------------------------------------------------------------------------------------------------------------
+  
+  MyMovieTheaterTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: movie-theater-table
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
