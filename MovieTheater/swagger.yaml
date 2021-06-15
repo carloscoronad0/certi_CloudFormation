@@ -75,7 +75,7 @@ paths:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:getRoom/invocations"
         httpMethod: "POST" # siempre POST para lambda, para que se setee API Gateway
         
-  /persons/{person_id}
+  /persons/{person_id}:
     get:
       summary: This endpoint returns all the movies a person has watched including date
       parameters:
@@ -117,13 +117,10 @@ paths:
             schema:
               type: object
               properties:
-                persons:
+                persons_id:
                   type: array
                   items:
-                    type: object
-                    properties:
-                      person_id:
-                        type: string
+                    type: string
                 room_id:
                   type: string
                 date:

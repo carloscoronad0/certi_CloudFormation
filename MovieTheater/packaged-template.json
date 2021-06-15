@@ -9,7 +9,7 @@ Resources:
       FunctionName: getMovie
       Handler: theater.getMovie
       Runtime: python3.6
-      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
       Policies:
       - DynamoDBReadPolicy:
           TableName:
@@ -19,7 +19,7 @@ Resources:
           MOVIES_TABLE:
             Ref: MyMovieTheaterTable
       Events:
-        GetUsers:
+        GetMovieInfo:
           Type: Api
           Properties:
             RestApiId:
@@ -32,7 +32,7 @@ Resources:
       FunctionName: roomsPerDay
       Handler: theater.roomsPerDay
       Runtime: python3.6
-      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
       Policies:
       - DynamoDBReadPolicy:
           TableName:
@@ -42,12 +42,81 @@ Resources:
           MOVIES_TABLE:
             Ref: MyMovieTheaterTable
       Events:
-        GetUsers:
+        GetRoomPerDayInfo:
           Type: Api
           Properties:
             RestApiId:
               Ref: MyMovieTheaterAPI
             Path: /roomsPerDay/movies/{movie_id}
+            Method: GET
+  GetRoom:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getRoom
+      Handler: theater.getRoom
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        GetRoomInfo:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /rooms/{room_id}
+            Method: GET
+  GetPersonMoviesWatched:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getPersonMoviesWatched
+      Handler: theater.getPersonMoviesWatched
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        getPersonMoviesWatchedInfo:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /persons/{person_id}
+            Method: GET
+  GetPeopleAssist:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getPeopleAssist
+      Handler: theater.getPeopleAssist
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        getPeopleAssistInfo:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /movies/{movie_id}/rooms/{room_id}
             Method: GET
   PutMovie:
     Type: AWS::Serverless::Function
@@ -55,7 +124,7 @@ Resources:
       FunctionName: putMovie
       Handler: theater.putMovie
       Runtime: python3.6
-      CodeUri: s3://lambda-cloudformation-lab/65ea449f7c8459a6742b1d4f7932d1d0
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
       Policies:
       - DynamoDBWritePolicy:
           TableName:
@@ -65,12 +134,35 @@ Resources:
           MOVIES_TABLE:
             Ref: MyMovieTheaterTable
       Events:
-        GetUsers:
+        PutMovieInfo:
           Type: Api
           Properties:
             RestApiId:
               Ref: MyMovieTheaterAPI
             Path: /movies/{movie_id}
+            Method: PUT
+  PutPersons:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: putPersons
+      Handler: theater.putPersonsToMovie
+      Runtime: python3.6
+      CodeUri: s3://lambda-cloudformation-lab/2bc3c3dc1bea8ce3d301af3055c086cf
+      Policies:
+      - DynamoDBWritePolicy:
+          TableName:
+            Ref: MyMovieTheaterTable
+      Environment:
+        Variables:
+          MOVIES_TABLE:
+            Ref: MyMovieTheaterTable
+      Events:
+        PutMovieInfo:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyMovieTheaterAPI
+            Path: /register/persons
             Method: PUT
   MyMovieTheaterAPI:
     Type: AWS::Serverless::Api
@@ -81,7 +173,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://lambda-cloudformation-lab/69bc69a9e854df533a11b6de9aa8dadb
+            Location: s3://lambda-cloudformation-lab/2d6be80369da1cf5bf7aecfea434fb7e
   MyMovieTheaterTable:
     Type: AWS::DynamoDB::Table
     Properties:
